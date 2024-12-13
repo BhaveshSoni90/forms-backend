@@ -6,29 +6,34 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const Joi = require('joi');
-require('dotenv').config();
 
 const app = express();
 
-// Middleware
-app.use(express.json());
-app.use(cors());
-app.use(helmet());
+// Middleware setup
+app.use(express.json());  // Parse JSON body
+app.use(cors());  // Enable Cross-Origin Resource Sharing
+app.use(helmet());  // Set various HTTP headers for security
 
+// Rate limiting middleware
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 100, // Limit each IP to 100 requests per window
 });
 app.use(limiter);
 
-// MongoDB connection
-const mongooseUri = process.env.MONGO_URI;
+// Hard-coded MongoDB URI and port
+const mongooseUri = "mongodb+srv://formsapp:formsapp@formsapp.taqqy.mongodb.net/formsAppDb?retryWrites=true&w=majority&appName=FormsApp"; // Replace with your actual MongoDB URI
+const PORT = 5000;  // Replace with your desired port
+
+// MongoDB connection setup
 mongoose
   .connect(mongooseUri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // Schemas and Models
+
+// User Schema
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -47,6 +52,7 @@ userSchema.methods.comparePassword = async function (password) {
 
 const User = mongoose.model('User', userSchema);
 
+// Question Schema for forms
 const questionSchema = new mongoose.Schema({
   questionText: { type: String, required: true },
   type: { type: String, required: true },
@@ -54,6 +60,7 @@ const questionSchema = new mongoose.Schema({
   questionImage: { type: String, default: '' },
 });
 
+// Form Schema
 const formSchema = new mongoose.Schema({
   title: { type: String, required: true },
   headerImage: { type: String },
@@ -62,7 +69,7 @@ const formSchema = new mongoose.Schema({
 
 const Form = mongoose.model('Form', formSchema);
 
-// Validation Schemas
+// Validation Schemas using Joi
 const userValidationSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
@@ -84,6 +91,8 @@ const formValidationSchema = Joi.object({
 });
 
 // Routes
+
+// Signup Route
 app.post('/api/signup', async (req, res, next) => {
   try {
     const { error } = userValidationSchema.validate(req.body);
@@ -101,6 +110,7 @@ app.post('/api/signup', async (req, res, next) => {
   }
 });
 
+// Login Route
 app.post('/api/login', async (req, res, next) => {
   try {
     const { error } = userValidationSchema.validate(req.body);
@@ -119,6 +129,7 @@ app.post('/api/login', async (req, res, next) => {
   }
 });
 
+// Get Forms Route
 app.get('/api/forms', async (req, res, next) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -132,6 +143,7 @@ app.get('/api/forms', async (req, res, next) => {
   }
 });
 
+// Create Form Route
 app.post('/api/forms', async (req, res, next) => {
   try {
     const { error } = formValidationSchema.validate(req.body);
@@ -151,6 +163,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message });
 });
 
-// Start the Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
