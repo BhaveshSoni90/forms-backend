@@ -15,11 +15,11 @@ app.use(cors());  // Enable Cross-Origin Resource Sharing
 app.use(helmet());  // Set various HTTP headers for security
 
 // Rate limiting middleware
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
-});
-app.use(limiter);
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // Limit each IP to 100 requests per window
+// });
+// app.use(limiter);
 
 // Hard-coded MongoDB URI and port
 const mongooseUri = "mongodb+srv://formsapp:formsapp@formsapp.taqqy.mongodb.net/formsAppDb?retryWrites=true&w=majority&appName=FormsApp"; // Replace with your actual MongoDB URI
