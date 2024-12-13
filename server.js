@@ -14,7 +14,7 @@ app.use(express.json());  // Parse JSON body
 app.use(cors());  // Enable Cross-Origin Resource Sharing
 app.use(helmet());  // Set various HTTP headers for security
 
-// Rate limiting middleware
+// Rate limiting middleware (optional, uncomment if needed)
 // const limiter = rateLimit({
 //   windowMs: 15 * 60 * 1000, // 15 minutes
 //   max: 100, // Limit each IP to 100 requests per window
@@ -27,7 +27,10 @@ const PORT = 5000;  // Replace with your desired port
 
 // MongoDB connection setup
 mongoose
-  .connect(mongooseUri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(mongooseUri, { 
+    connectTimeoutMS: 30000,  // Timeout after 30 seconds
+    socketTimeoutMS: 45000   // Socket timeout after 45 seconds
+  })
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
